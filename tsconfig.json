@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "allowJs": false,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "outDir": "dist",
+    "resolveJsonModule": true,
+    "rootDir": "src",
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ESNext"
+  },
+  "include": ["src/**/*", "src/**/*.json", "src/**/*.d.ts", "codegen.d.ts"]
+}
