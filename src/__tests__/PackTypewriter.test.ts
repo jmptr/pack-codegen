@@ -86,8 +86,8 @@ const json: JsonInput = {
 };
 
 test('compileJson', () => {
-  const compiled = compileSchema<PackSchema>(json);
-  expect(compiled).toStrictEqual({
+  const actual = compileSchema(json);
+  const expected = {
     sections: [
       {
         category: 'test',
@@ -172,9 +172,11 @@ test('compileJson', () => {
       },
     ],
     settings: [],
-  });
+  };
 
-  const typeDefs = toTypeDefinitions(compiled);
+  expect(actual).toStrictEqual(expected);
+
+  const typeDefs = toTypeDefinitions(actual);
 
   console.info(typeDefs);
 });

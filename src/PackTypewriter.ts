@@ -1,37 +1,13 @@
 import { BlocksField, FormField, GroupField } from '@pack/types';
-import { toPascalCase } from './lib';
+import { supplantJson, toPascalCase } from './lib';
 
-function supplantSchema(obj: Json, context: CompilerContext): Json {
-  if (typeof obj !== 'object' || obj === null) {
-    return obj;
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map((item) => supplantSchema(item, context));
-  }
-
-  const result: Record<string, Json> = {};
-  for (const [key, value] of Object.entries(obj)) {
-    if (typeof value === 'string' && value.startsWith('$constants.')) {
-      const contextKey = value.replace('$constants.', '');
-      const contextValue = supplantSchema(
-        context.constants[contextKey],
-        context,
-      );
-      result[key] = contextValue;
-    } else {
-      result[key] = supplantSchema(value, context);
-    }
-  }
-  return result;
-}
-
-export function compileSchema<Tout>(input: JsonInput) {
+export function compileSchema(input: JsonInput): PackSchema {
   const { constants, template } = input;
   const context = {
     constants: constants as Record<string, Json>,
   };
-  return supplantSchema(template, context) as Tout;
+  const result = supplantJson(template, context) as PackSchema;
+  return result;
 }
 
 /**
