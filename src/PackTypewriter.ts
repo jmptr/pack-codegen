@@ -1,4 +1,9 @@
-import { BlocksField, FormField, GroupField } from '@pack/types';
+import {
+  BlocksField,
+  FormField,
+  GroupField,
+  GroupListField,
+} from '@pack/types';
 import { supplantJson, toPascalCase } from './lib';
 
 export function compileSchema(input: JsonInput): PackSchema {
@@ -66,6 +71,17 @@ function addGroupToTypes(field: GroupField, allTypes: string[]) {
   return `${field.name}?: ${groupName}; `;
 }
 
+function addGroupListToTypes(field: GroupListField, allTypes: string[]) {
+  const groupListName = `${toPascalCase(field.name)}GroupCms`;
+  let groupListType = `type ${groupListName} = { `;
+  for (const formField of field.fields) {
+    groupListType += addFieldToTypes(formField, allTypes);
+  }
+  groupListType += '}; ';
+  allTypes.push(groupListType);
+  return `${field.name}?: ${groupListName}[]; `;
+}
+
 /**
  * Add a block to the types.
  * @param field - The field to add to the types
@@ -127,6 +143,8 @@ function addFieldToTypes(field: FormField, allTypes: string[]) {
       return `${field.name}?: ${getComponentType(field.field.component)}[]`;
     case 'group':
       return addGroupToTypes(field, allTypes);
+    case 'group-list':
+      return addGroupListToTypes(field, allTypes);
     case 'blocks':
       return addBlockToTypes(field, allTypes);
   }
