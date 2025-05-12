@@ -5,6 +5,7 @@ import {
   GroupListField,
 } from '@pack/types';
 import { supplantJson, toPascalCase } from './lib';
+import { Json, JsonInput, PackSchema } from './types';
 
 export function compileSchema(input: JsonInput): PackSchema {
   const { constants, template } = input;

@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 
 import { compileSchema, toTypeDefinitions } from '../PackTypewriter';
-
+import { JsonInput } from '../types';
 const json: JsonInput = {
   constants: {
     COLOR_PICKER_DEFAULTS: [

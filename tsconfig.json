@@ -15,5 +15,5 @@
     "strict": true,
     "target": "ESNext"
   },
-  "include": ["src/**/*", "src/**/*.json", "src/**/*.d.ts", "codegen.d.ts"]
+  "include": ["src/**/*", "src/**/*.json", "src/**/*.d.ts"]
 }

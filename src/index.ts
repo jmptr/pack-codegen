@@ -1,3 +1,2 @@
-import { compileSchema } from './PackTypewriter';
-
-export { compileSchema };
+import { compileSchema, toTypeDefinitions } from './PackTypewriter';
+export { compileSchema, toTypeDefinitions };

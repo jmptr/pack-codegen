@@ -1,3 +1,5 @@
+import { CompilerContext, Json } from './types';
+
 export function toPascalCase(str: string) {
   return str
     .replace(/[-_\s]+(.)?/g, function (_: string, chr: string) {
