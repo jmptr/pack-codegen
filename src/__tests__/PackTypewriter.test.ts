@@ -1,3 +1,5 @@
+import { expect, test } from 'vitest';
+
 import { compileSchema, toTypeDefinitions } from '../PackTypewriter';
 
 const json: JsonInput = {

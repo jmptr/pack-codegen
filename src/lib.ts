@@ -8,13 +8,15 @@ export function toPascalCase(str: string) {
     });
 }
 
+type SupplantJson = (obj: Json, context: CompilerContext) => Json;
+
 /**
  * Supplant the constants in the JSON object.
  * @param obj - The JSON object to supplant
  * @param context - The context to use for supplanting
  * @returns The supplanted JSON object
  */
-export function supplantJson(obj: Json, context: CompilerContext): Json {
+export const supplantJson: SupplantJson = (obj, context) => {
   if (typeof obj !== 'object' || obj === null) {
     return obj;
   }
@@ -34,4 +36,4 @@ export function supplantJson(obj: Json, context: CompilerContext): Json {
     }
   }
   return result;
-}
+};
