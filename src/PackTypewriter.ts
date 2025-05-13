@@ -16,151 +16,131 @@ export function compileSchema(input: JsonInput): PackSchema {
   return result;
 }
 
-/**
- * Get the type of a component.  This is only used for getting the subtype of
- * a list field.
- * @param component - The component to get the type of
- * @returns The type of the component
- */
-function getComponentType(component: string) {
-  switch (component) {
-    case 'color':
-    case 'date':
-    case 'html':
-    case 'markdown':
-    case 'radio-group':
-    case 'rich-text':
-    case 'select':
-    case 'text':
-    case 'textarea':
-      return 'string';
-    case 'image':
-      return 'MediaCms';
-    case 'number':
-      return 'number';
-    case 'toggle':
-      return 'boolean';
-    case 'productSearch':
-      return 'ProductCms';
-    case 'collections':
-      return 'CollectionCms';
-    case 'productBundles':
-      return 'ProductBundleCms';
-    case 'link':
-      return 'LinkCms';
-    case 'tags':
-      return 'string[]';
-    default:
-      return 'string';
-  }
-}
+export class PackTypeWriter {
+  outTypes: Record<string, string[]> = {};
+  constructor(public schema: PackSchema) {}
 
-/**
- * Add a group to the types.
- * @param field - The field to add to the types
- * @param allTypes - The list of all types
- * @returns The type of the group
- */
-function addGroupToTypes(field: GroupField, allTypes: string[]) {
-  const groupName = `${toPascalCase(field.name)}GroupCms`;
-  let groupType = `type ${groupName} = { `;
-  for (const formField of field.fields) {
-    groupType += addFieldToTypes(formField, allTypes);
-  }
-  groupType += '};';
-  allTypes.push(groupType);
-  return `${field.name}?: ${groupName}; `;
-}
-
-function addGroupListToTypes(field: GroupListField, allTypes: string[]) {
-  const groupListName = `${toPascalCase(field.name)}GroupCms`;
-  let groupListType = `type ${groupListName} = { `;
-  for (const formField of field.fields) {
-    groupListType += addFieldToTypes(formField, allTypes);
-  }
-  groupListType += '};';
-  allTypes.push(groupListType);
-  return `${field.name}?: ${groupListName}[];`;
-}
-
-/**
- * Add a block to the types.
- * @param field - The field to add to the types
- * @param allTypes - The list of all types
- * @returns The type of the block
- */
-function addBlockToTypes(field: BlocksField, allTypes: string[]) {
-  const templateTypes: string[] = [];
-  for (const [templateName, template] of Object.entries(field.templates)) {
-    let templateStr = '';
-    const templateTypeName = `${toPascalCase(templateName)}TemplateCms`;
-    templateStr += `type ${templateTypeName} = { `;
-    templateStr += `_template: "${templateName}"; `;
-    for (const formField of template.fields || []) {
-      templateStr += `${addFieldToTypes(formField, allTypes)}`;
+  addFieldToTypes(field: FormField, typeKey: string) {
+    switch (field.component) {
+      case 'color':
+      case 'date':
+      case 'html':
+      case 'markdown':
+      case 'radio-group':
+      case 'rich-text':
+      case 'select':
+      case 'text':
+      case 'textarea':
+        return `${field.name}?: string; `;
+      case 'image':
+        return `${field.name}?: MediaCms; `;
+      case 'number':
+        return `${field.name}?: number; `;
+      case 'toggle':
+        return `${field.name}?: boolean; `;
+      case 'productSearch':
+        return `${field.name}?: ProductCms; `;
+      case 'collections':
+        return `${field.name}?: CollectionCms; `;
+      case 'productBundles':
+        return `${field.name}?: ProductBundleCms; `;
+      case 'link':
+        return `${field.name}?: LinkCms; `;
+      case 'tags':
+        return `${field.name}?: string[]; `;
+      case 'list':
+        return `${field.name}?: ${this.getComponentType(field.field.component)}[]`;
+      case 'group':
+        return `${field.name}?: ${this.addGroupToTypes(field, typeKey)}; `;
+      case 'group-list':
+        return `${field.name}?: ${this.addGroupListToTypes(field, typeKey)}; `;
+      case 'blocks':
+        return `${field.name}?: ${this.addBlockToTypes(field, typeKey)}; `;
     }
-    templateStr += '}';
-    templateTypes.push(templateTypeName);
-    allTypes.push(templateStr);
   }
-  return `${field.name}?: (${templateTypes.join(' | ')})[]; `;
-}
 
-/**
- * Add a field to the types.
- * @param field - The field to add to the types
- * @param allTypes - The list of all types
- * @returns The type of the field
- */
-function addFieldToTypes(field: FormField, allTypes: string[]) {
-  switch (field.component) {
-    case 'color':
-    case 'date':
-    case 'html':
-    case 'markdown':
-    case 'radio-group':
-    case 'rich-text':
-    case 'select':
-    case 'text':
-    case 'textarea':
-      return `${field.name}?: string; `;
-    case 'image':
-      return `${field.name}?: MediaCms; `;
-    case 'number':
-      return `${field.name}?: number; `;
-    case 'toggle':
-      return `${field.name}?: boolean; `;
-    case 'productSearch':
-      return `${field.name}?: ProductCms; `;
-    case 'collections':
-      return `${field.name}?: CollectionCms; `;
-    case 'productBundles':
-      return `${field.name}?: ProductBundleCms; `;
-    case 'link':
-      return `${field.name}?: LinkCms; `;
-    case 'tags':
-      return `${field.name}?: string[]; `;
-    case 'list':
-      return `${field.name}?: ${getComponentType(field.field.component)}[]`;
-    case 'group':
-      return addGroupToTypes(field, allTypes);
-    case 'group-list':
-      return addGroupListToTypes(field, allTypes);
-    case 'blocks':
-      return addBlockToTypes(field, allTypes);
+  addBlockToTypes(field: BlocksField, typeKey: string) {
+    const templateTypes: string[] = [];
+    for (const [templateName, template] of Object.entries(field.templates)) {
+      let templateStr = '';
+      const templateTypeName = `${toPascalCase(templateName)}TemplateCms`;
+      templateStr += `type ${templateTypeName} = { `;
+      templateStr += `_template: "${templateName}"; `;
+      for (const formField of template.fields || []) {
+        templateStr += `${this.addFieldToTypes(formField, typeKey)}`;
+      }
+      templateStr += '}';
+      templateTypes.push(templateTypeName);
+      this.outTypes[typeKey].push(templateStr);
+    }
+    return `(${templateTypes.join(' | ')})[]`;
   }
-}
 
-/**
- * Convert the schema to type definitions.
- * @param input - The schema to convert
- * @returns The type definitions
- */
-export function toTypeDefinitions(input: PackSchema) {
-  const typeDefs: string[] = [];
-  for (const section of input.sections) {
-    const typeDef = `type ${toPascalCase(section.key)}SectionCms = { ${section.fields.map((field) => addFieldToTypes(field, typeDefs)).join(' ')} }`;
-    typeDefs.push(typeDef);
+  addGroupToTypes(field: GroupField, typeKey: string) {
+    const groupName = `${toPascalCase(field.name)}GroupCms`;
+    let groupType = `type ${groupName} = { `;
+    for (const formField of field.fields) {
+      groupType += this.addFieldToTypes(formField, typeKey);
+    }
+    groupType += '};';
+    this.outTypes[typeKey].push(groupType);
+    return groupName;
   }
-  return typeDefs.join('\n');
+
+  addGroupListToTypes(field: GroupListField, typeKey: string) {
+    const groupListName = `${toPascalCase(field.name)}GroupCms`;
+    let groupListType = `type ${groupListName} = { `;
+    for (const formField of field.fields) {
+      groupListType += this.addFieldToTypes(formField, typeKey);
+    }
+    groupListType += '};';
+    this.outTypes[typeKey].push(groupListType);
+    return `${groupListName}[]`;
+  }
+
+  getComponentType(component: string) {
+    switch (component) {
+      case 'color':
+      case 'date':
+      case 'html':
+      case 'markdown':
+      case 'radio-group':
+      case 'rich-text':
+      case 'select':
+      case 'text':
+      case 'textarea':
+        return 'string';
+      case 'image':
+        return 'MediaCms';
+      case 'number':
+        return 'number';
+      case 'toggle':
+        return 'boolean';
+      case 'productSearch':
+        return 'ProductCms';
+      case 'collections':
+        return 'CollectionCms';
+      case 'productBundles':
+        return 'ProductBundleCms';
+      case 'link':
+        return 'LinkCms';
+      case 'tags':
+        return 'string[]';
+      default:
+        return 'string';
+    }
+  }
+
+  build() {
+    for (const section of this.schema.sections) {
+      const typeKey = `${toPascalCase(section.key)}SectionCms`;
+      this.outTypes[typeKey] = [];
+      const typeDef = `type ${typeKey} = { ${section.fields.map((field) => this.addFieldToTypes(field, typeKey)).join('')} }`;
+      this.outTypes[typeKey].push(typeDef);
+    }
+    const sectionType = Object.entries(this.outTypes)
+      .map(([_, types]) => `${types.join('\n')}`)
+      .join('\n');
+    return sectionType;
+  }
 }

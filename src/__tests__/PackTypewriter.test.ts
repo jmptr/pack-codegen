@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 
-import { compileSchema, toTypeDefinitions } from '../PackTypewriter';
+import { compileSchema, PackTypeWriter } from '../PackTypewriter';
 import { JsonInput } from '../types';
 const json: JsonInput = {
   constants: {
@@ -181,13 +181,14 @@ test('compileJson', () => {
 
 test('toTypeDefinitions', () => {
   const schema = compileSchema(json);
-  const actual = toTypeDefinitions(schema);
+  const packTypeWriter = new PackTypeWriter(schema);
+  const actual = packTypeWriter.build();
 
   expect(actual).toMatchInlineSnapshot(`
     "type GroupNameGroupCms = { message?: string; };
     type GroupListNameGroupCms = { message?: string; };
     type FirstTemplateCms = { _template: "first"; message?: string; }
     type SecondTemplateCms = { _template: "second"; color?: string; }
-    type TestSectionCms = { color?: string;  groupName?: GroupNameGroupCms;  groupListName?: GroupListNameGroupCms[]; mixedType?: (FirstTemplateCms | SecondTemplateCms)[];  }"
+    type TestSectionCms = { color?: string; groupName?: GroupNameGroupCms; groupListName?: GroupListNameGroupCms[]; mixedType?: (FirstTemplateCms | SecondTemplateCms)[];  }"
   `);
 });
