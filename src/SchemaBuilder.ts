@@ -1,8 +1,13 @@
 import fs from 'fs';
-import { BuilderResults, PackSchema } from './types';
+import { PackSchema } from './types';
 
 export type SchemaBuilderOptions = {
   rootDir: string;
+};
+
+export type BuilderResults = {
+  sections: Record<string, string>;
+  settings: string;
 };
 
 export class SchemaBuilder {
