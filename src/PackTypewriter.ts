@@ -138,9 +138,18 @@ export class PackTypeWriter {
       const typeDef = `type ${typeKey} = { ${section.fields.map((field) => this.addFieldToTypes(field, typeKey)).join('')} }`;
       this.outTypes[typeKey].push(typeDef);
     }
-    const sectionType = Object.entries(this.outTypes)
-      .map(([_, types]) => `${types.join('\n')}`)
-      .join('\n');
+    const typeKey = `settings`;
+    let settingsType = `type SettingsCms = { `;
+    this.outTypes[typeKey] = [];
+    for (const settingsField of this.schema.settings) {
+      settingsType += this.addFieldToTypes(settingsField, typeKey);
+    }
+    settingsType += '};';
+    this.outTypes[typeKey].push(settingsType);
+
+    const sectionType = Object.entries(this.outTypes).map(
+      ([_, types]) => [_, `${types.join('\n')}`] as [string, string],
+    );
     return sectionType;
   }
 }

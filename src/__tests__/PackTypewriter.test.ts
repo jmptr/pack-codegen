@@ -83,7 +83,14 @@ const json: JsonInput = {
         ],
       },
     ],
-    settings: [],
+    settings: [
+      {
+        label: 'Menu',
+        name: 'menu',
+        component: 'group',
+        fields: '$constants.MESSAGE_DEFAULT_FIELDS',
+      },
+    ],
   },
 };
 
@@ -173,7 +180,20 @@ test('compileJson', () => {
         ],
       },
     ],
-    settings: [],
+    settings: [
+      {
+        label: 'Menu',
+        name: 'menu',
+        component: 'group',
+        fields: [
+          {
+            label: 'Message',
+            component: 'text',
+            name: 'message',
+          },
+        ],
+      },
+    ],
   };
 
   expect(actual).toStrictEqual(expected);
@@ -182,7 +202,7 @@ test('compileJson', () => {
 test('toTypeDefinitions', () => {
   const schema = compileSchema(json);
   const packTypeWriter = new PackTypeWriter(schema);
-  const actual = packTypeWriter.build();
+  const [[_, actual], [__, settings]] = packTypeWriter.build();
 
   expect(actual).toMatchInlineSnapshot(`
     "type GroupNameGroupCms = { message?: string; };
@@ -190,5 +210,10 @@ test('toTypeDefinitions', () => {
     type FirstTemplateCms = { _template: "first"; message?: string; }
     type SecondTemplateCms = { _template: "second"; color?: string; }
     type TestSectionCms = { color?: string; groupName?: GroupNameGroupCms; groupListName?: GroupListNameGroupCms[]; mixedType?: (FirstTemplateCms | SecondTemplateCms)[];  }"
+  `);
+
+  expect(settings).toMatchInlineSnapshot(`
+    "type MenuGroupCms = { message?: string; };
+    type SettingsCms = { menu?: MenuGroupCms; };"
   `);
 });

@@ -14,9 +14,17 @@ type SupplantJson = (obj: Json, context: CompilerContext) => Json;
 
 /**
  * Supplant the constants in the JSON object.
- * @param obj - The JSON object to supplant
- * @param context - The context to use for supplanting
- * @returns The supplanted JSON object
+ * @param {Json} obj - The JSON object to supplant
+ * @param {CompilerContext} context - The context to use for supplanting
+ * @returns {Json} The supplanted JSON object
+ * @example
+ * ```ts
+ * const obj = {
+ *   message: '$constants.MESSAGE_DEFAULT',
+ * };
+ * const context = { constants: { MESSAGE_DEFAULT: 'Hello, world!' } };
+ * const supplanted = supplantJson(obj, context);
+ * supplanted === { message: 'Hello, world!' }
  */
 export const supplantJson: SupplantJson = (obj, context) => {
   if (typeof obj !== 'object' || obj === null) {
