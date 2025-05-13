@@ -67,7 +67,7 @@ function addGroupToTypes(field: GroupField, allTypes: string[]) {
   for (const formField of field.fields) {
     groupType += addFieldToTypes(formField, allTypes);
   }
-  groupType += '}; ';
+  groupType += '};';
   allTypes.push(groupType);
   return `${field.name}?: ${groupName}; `;
 }
@@ -78,9 +78,9 @@ function addGroupListToTypes(field: GroupListField, allTypes: string[]) {
   for (const formField of field.fields) {
     groupListType += addFieldToTypes(formField, allTypes);
   }
-  groupListType += '}; ';
+  groupListType += '};';
   allTypes.push(groupListType);
-  return `${field.name}?: ${groupListName}[]; `;
+  return `${field.name}?: ${groupListName}[];`;
 }
 
 /**
@@ -159,12 +159,7 @@ function addFieldToTypes(field: FormField, allTypes: string[]) {
 export function toTypeDefinitions(input: PackSchema) {
   const typeDefs: string[] = [];
   for (const section of input.sections) {
-    let typeDef = `type ${toPascalCase(section.key)}SectionCms = { `;
-    for (const formField of section.fields) {
-      const propStr = addFieldToTypes(formField, typeDefs);
-      typeDef += `${propStr}`;
-    }
-    typeDef += '}';
+    const typeDef = `type ${toPascalCase(section.key)}SectionCms = { ${section.fields.map((field) => addFieldToTypes(field, typeDefs)).join(' ')} }`;
     typeDefs.push(typeDef);
   }
   return typeDefs.join('\n');

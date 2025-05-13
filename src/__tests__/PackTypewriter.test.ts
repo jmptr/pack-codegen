@@ -177,8 +177,17 @@ test('compileJson', () => {
   };
 
   expect(actual).toStrictEqual(expected);
+});
 
-  const typeDefs = toTypeDefinitions(actual);
+test('toTypeDefinitions', () => {
+  const schema = compileSchema(json);
+  const actual = toTypeDefinitions(schema);
 
-  console.info(typeDefs);
+  expect(actual).toMatchInlineSnapshot(`
+    "type GroupNameGroupCms = { message?: string; };
+    type GroupListNameGroupCms = { message?: string; };
+    type FirstTemplateCms = { _template: "first"; message?: string; }
+    type SecondTemplateCms = { _template: "second"; color?: string; }
+    type TestSectionCms = { color?: string;  groupName?: GroupNameGroupCms;  groupListName?: GroupListNameGroupCms[]; mixedType?: (FirstTemplateCms | SecondTemplateCms)[];  }"
+  `);
 });
