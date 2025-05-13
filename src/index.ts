@@ -1,2 +1,2 @@
-import { compileSchema, toTypeDefinitions } from './PackTypewriter';
-export { compileSchema, toTypeDefinitions };
+import { compileSchema, TypeScriptBuilder } from './TypeScriptBuilder';
+export { compileSchema, TypeScriptBuilder };

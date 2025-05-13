@@ -5,7 +5,7 @@ import {
   GroupListField,
 } from '@pack/types';
 import { supplantJson, toPascalCase } from './lib';
-import { Json, JsonInput, PackSchema } from './types';
+import { BuilderResults, Json, JsonInput, PackSchema } from './types';
 
 export function compileSchema(input: JsonInput): PackSchema {
   const { constants, template } = input;
@@ -16,7 +16,7 @@ export function compileSchema(input: JsonInput): PackSchema {
   return result;
 }
 
-export class PackTypeWriter {
+export class TypeScriptBuilder {
   outTypes: Record<string, string[]> = {};
   constructor(public schema: PackSchema) {}
 
@@ -131,13 +131,15 @@ export class PackTypeWriter {
     }
   }
 
-  build() {
+  build(): BuilderResults {
     for (const section of this.schema.sections) {
-      const typeKey = `${toPascalCase(section.key)}SectionCms`;
-      this.outTypes[typeKey] = [];
-      const typeDef = `type ${typeKey} = { ${section.fields.map((field) => this.addFieldToTypes(field, typeKey)).join('')} }`;
-      this.outTypes[typeKey].push(typeDef);
+      const sectionName = `${toPascalCase(section.key)}Section`;
+      const typeKey = `${sectionName}Cms`;
+      this.outTypes[sectionName] = [];
+      const typeDef = `type ${typeKey} = { ${section.fields.map((field) => this.addFieldToTypes(field, sectionName)).join('')} }`;
+      this.outTypes[sectionName].push(typeDef);
     }
+
     const typeKey = `settings`;
     let settingsType = `type SettingsCms = { `;
     this.outTypes[typeKey] = [];
@@ -147,9 +149,17 @@ export class PackTypeWriter {
     settingsType += '};';
     this.outTypes[typeKey].push(settingsType);
 
-    const sectionType = Object.entries(this.outTypes).map(
-      ([_, types]) => [_, `${types.join('\n')}`] as [string, string],
+    const builderResults = Object.entries(this.outTypes).reduce<BuilderResults>(
+      (acc, [key, value]) => {
+        if (key === 'settings') {
+          acc.settings = value.join('\n');
+        } else {
+          acc.sections[key] = value.join('\n');
+        }
+        return acc;
+      },
+      { sections: {}, settings: '' },
     );
-    return sectionType;
+    return builderResults;
   }
 }

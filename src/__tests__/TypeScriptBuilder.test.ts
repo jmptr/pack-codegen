@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 
-import { compileSchema, PackTypeWriter } from '../PackTypewriter';
+import { compileSchema, TypeScriptBuilder } from '../TypeScriptBuilder';
 import { JsonInput } from '../types';
 const json: JsonInput = {
   constants: {
@@ -201,10 +201,14 @@ test('compileJson', () => {
 
 test('toTypeDefinitions', () => {
   const schema = compileSchema(json);
-  const packTypeWriter = new PackTypeWriter(schema);
-  const [[_, actual], [__, settings]] = packTypeWriter.build();
+  const packTypeWriter = new TypeScriptBuilder(schema);
+  const actual = packTypeWriter.build();
 
-  expect(actual).toMatchInlineSnapshot(`
+  const {
+    sections: { TestSection },
+    settings,
+  } = actual;
+  expect(TestSection).toMatchInlineSnapshot(`
     "type GroupNameGroupCms = { message?: string; };
     type GroupListNameGroupCms = { message?: string; };
     type FirstTemplateCms = { _template: "first"; message?: string; }

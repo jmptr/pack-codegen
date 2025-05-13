@@ -18,6 +18,11 @@ export type PackSchema = {
   settings: FormField[];
 };
 
+export type BuilderResults = {
+  sections: Record<string, string>;
+  settings: string;
+};
+
 export type Json =
   | string
   | number
