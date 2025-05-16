@@ -3,6 +3,7 @@ import {
   FormField,
   GroupField,
   GroupListField,
+  ListField,
 } from '@pack/types';
 import { supplantJson, toPascalCase } from './lib';
 import { BuilderResults } from './SchemaBuilder';
@@ -21,7 +22,7 @@ export class TypeScriptBuilder {
   outTypes: Record<string, string[]> = {};
   constructor(public schema: PackSchema) {}
 
-  addFieldToTypes(field: FormField, typeKey: string) {
+  addField(field: FormField, typeKey: string) {
     switch (field.component) {
       case 'color':
       case 'date':
@@ -50,25 +51,25 @@ export class TypeScriptBuilder {
       case 'tags':
         return `${field.name}?: string[]; `;
       case 'list':
-        return `${field.name}?: ${this.getComponentType(field.field.component)}[]`;
+        return `${field.name}?: ${this.getListType(field)}[]`;
       case 'group':
-        return `${field.name}?: ${this.addGroupToTypes(field, typeKey)}; `;
+        return `${field.name}?: ${this.getGroupType(field, typeKey)}; `;
       case 'group-list':
-        return `${field.name}?: ${this.addGroupListToTypes(field, typeKey)}; `;
+        return `${field.name}?: ${this.getGroupListType(field, typeKey)}; `;
       case 'blocks':
-        return `${field.name}?: ${this.addBlockToTypes(field, typeKey)}; `;
+        return `${field.name}?: ${this.getBlockType(field, typeKey)}; `;
     }
   }
 
-  addBlockToTypes(field: BlocksField, typeKey: string) {
+  getBlockType(field: BlocksField, typeKey: string) {
     const templateTypes: string[] = [];
     for (const [templateName, template] of Object.entries(field.templates)) {
       let templateStr = '';
       const templateTypeName = `${toPascalCase(templateName)}TemplateCms`;
-      templateStr += `type ${templateTypeName} = { `;
+      templateStr += `export type ${templateTypeName} = { `;
       templateStr += `_template: "${templateName}"; `;
       for (const formField of template.fields || []) {
-        templateStr += `${this.addFieldToTypes(formField, typeKey)}`;
+        templateStr += `${this.addField(formField, typeKey)}`;
       }
       templateStr += '}';
       templateTypes.push(templateTypeName);
@@ -77,30 +78,30 @@ export class TypeScriptBuilder {
     return `(${templateTypes.join(' | ')})[]`;
   }
 
-  addGroupToTypes(field: GroupField, typeKey: string) {
+  getGroupType(field: GroupField, typeKey: string) {
     const groupName = `${toPascalCase(field.name)}GroupCms`;
-    let groupType = `type ${groupName} = { `;
+    let groupType = `export type ${groupName} = { `;
     for (const formField of field.fields) {
-      groupType += this.addFieldToTypes(formField, typeKey);
+      groupType += this.addField(formField, typeKey);
     }
     groupType += '};';
     this.outTypes[typeKey].push(groupType);
     return groupName;
   }
 
-  addGroupListToTypes(field: GroupListField, typeKey: string) {
+  getGroupListType(field: GroupListField, typeKey: string) {
     const groupListName = `${toPascalCase(field.name)}GroupCms`;
-    let groupListType = `type ${groupListName} = { `;
+    let groupListType = `export type ${groupListName} = { `;
     for (const formField of field.fields) {
-      groupListType += this.addFieldToTypes(formField, typeKey);
+      groupListType += this.addField(formField, typeKey);
     }
     groupListType += '};';
     this.outTypes[typeKey].push(groupListType);
     return `${groupListName}[]`;
   }
 
-  getComponentType(component: string) {
-    switch (component) {
+  getListType(field: ListField) {
+    switch (field.field.component) {
       case 'color':
       case 'date':
       case 'html':
@@ -110,25 +111,25 @@ export class TypeScriptBuilder {
       case 'select':
       case 'text':
       case 'textarea':
-        return 'string';
+        return 'string[]';
       case 'image':
-        return 'MediaCms';
+        return 'MediaCms[]';
       case 'number':
-        return 'number';
+        return 'number[]';
       case 'toggle':
-        return 'boolean';
+        return 'boolean[]';
       case 'productSearch':
-        return 'ProductCms';
+        return 'ProductCms[]';
       case 'collections':
-        return 'CollectionCms';
+        return 'CollectionCms[]';
       case 'productBundles':
-        return 'ProductBundleCms';
+        return 'ProductBundleCms[]';
       case 'link':
-        return 'LinkCms';
+        return 'LinkCms[]';
       case 'tags':
         return 'string[]';
       default:
-        return 'string';
+        return 'string[]';
     }
   }
 
@@ -137,15 +138,15 @@ export class TypeScriptBuilder {
       const sectionName = `${toPascalCase(section.key)}Section`;
       const typeKey = `${sectionName}Cms`;
       this.outTypes[sectionName] = [];
-      const typeDef = `type ${typeKey} = { ${section.fields.map((field) => this.addFieldToTypes(field, sectionName)).join('')} }`;
+      const typeDef = `export type ${typeKey} = { ${section.fields.map((field) => this.addField(field, sectionName)).join('')} }`;
       this.outTypes[sectionName].push(typeDef);
     }
 
     const typeKey = `settings`;
-    let settingsType = `type SettingsCms = { `;
+    let settingsType = `export type SettingsCms = { `;
     this.outTypes[typeKey] = [];
     for (const settingsField of this.schema.settings) {
-      settingsType += this.addFieldToTypes(settingsField, typeKey);
+      settingsType += this.addField(settingsField, typeKey);
     }
     settingsType += '};';
     this.outTypes[typeKey].push(settingsType);

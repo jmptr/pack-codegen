@@ -209,15 +209,15 @@ test('toTypeDefinitions', () => {
     settings,
   } = actual;
   expect(TestSection).toMatchInlineSnapshot(`
-    "type GroupNameGroupCms = { message?: string; };
-    type GroupListNameGroupCms = { message?: string; };
-    type FirstTemplateCms = { _template: "first"; message?: string; }
-    type SecondTemplateCms = { _template: "second"; color?: string; }
-    type TestSectionCms = { color?: string; groupName?: GroupNameGroupCms; groupListName?: GroupListNameGroupCms[]; mixedType?: (FirstTemplateCms | SecondTemplateCms)[];  }"
+    "export type GroupNameGroupCms = { message?: string; };
+    export type GroupListNameGroupCms = { message?: string; };
+    export type FirstTemplateCms = { _template: "first"; message?: string; }
+    export type SecondTemplateCms = { _template: "second"; color?: string; }
+    export type TestSectionCms = { color?: string; groupName?: GroupNameGroupCms; groupListName?: GroupListNameGroupCms[]; mixedType?: (FirstTemplateCms | SecondTemplateCms)[];  }"
   `);
 
   expect(settings).toMatchInlineSnapshot(`
-    "type MenuGroupCms = { message?: string; };
-    type SettingsCms = { menu?: MenuGroupCms; };"
+    "export type MenuGroupCms = { message?: string; };
+    export type SettingsCms = { menu?: MenuGroupCms; };"
   `);
 });
